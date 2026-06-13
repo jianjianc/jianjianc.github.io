@@ -100,32 +100,53 @@
 
       function pad(n) { return n < 10 ? "0" + n : "" + n; }
 
-      function update() {
-        var now = new Date();
+      // 计算达拉斯中部时区偏移（自动处理夏令时）
+      // DST：3月第二个周日 2:00 AM CST (=8:00 UTC) 开始；11月第一个周日 2:00 AM CDT (=7:00 UTC) 结束
+      function getCentralOffset(utcMs) {
+        var d = new Date(utcMs);
+        var y = d.getUTCFullYear();
+        var m = d.getUTCMonth(); // 0-based
+        if (m < 2 || m > 10) return -6;  // Jan/Feb/Dec: CST
+        if (m > 2 && m < 10) return -5;  // Apr–Oct: CDT
+        if (m === 2) { // March
+          var dow = new Date(Date.UTC(y, 2, 1)).getUTCDay();
+          var sun2 = (dow === 0 ? 1 : 8 - dow) + 7;
+          return utcMs >= Date.UTC(y, 2, sun2, 8) ? -5 : -6;
+        }
+        // November
+        var dow = new Date(Date.UTC(y, 10, 1)).getUTCDay();
+        var sun1 = dow === 0 ? 1 : 8 - dow;
+        return utcMs >= Date.UTC(y, 10, sun1, 7) ? -6 : -5;
+      }
 
-        var h = now.getHours();
-        var m = pad(now.getMinutes());
+      function update() {
+        var utcMs = new Date().getTime();
+
+        // 达拉斯本地时间
+        var ctOffset = getCentralOffset(utcMs);
+        var ctNow = new Date(utcMs + ctOffset * 60 * 60 * 1000);
+        var h = ctNow.getUTCHours();
+        var m = pad(ctNow.getUTCMinutes());
         var ampm = h >= 12 ? "PM" : "AM";
         h = h % 12 || 12;
         document.getElementById("time").textContent = h + ":" + m + " " + ampm;
 
-        var y = now.getFullYear();
-        var mo = now.getMonth();
-        var d = now.getDate();
-        document.getElementById("date").textContent =
-          months[mo] + " " + d + ", " + y;
-        document.getElementById("weekday").textContent = weekdays[now.getDay()];
+        var y = ctNow.getUTCFullYear();
+        var mo = ctNow.getUTCMonth();
+        var d = ctNow.getUTCDate();
+        document.getElementById("date").textContent = months[mo] + " " + d + ", " + y;
+        document.getElementById("weekday").textContent = weekdays[ctNow.getUTCDay()];
 
         try {
-          var lunar = Lunar.fromDate(now);
+          var lunar = Lunar.fromDate(new Date(y, mo, d));
           document.getElementById("lunar").textContent =
             "农历 " + lunar.getMonthInChinese() + "月" + lunar.getDayInChinese();
         } catch (e) {
           document.getElementById("lunar").textContent = "";
         }
 
-        // 扬州时间 UTC+8：now.getTime() 是 UTC 毫秒，直接加 8 小时再用 getUTC* 读取
-        var yzNow = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+        // 扬州时间 UTC+8
+        var yzNow = new Date(utcMs + 8 * 60 * 60 * 1000);
         var yzH = yzNow.getUTCHours();
         var yzM = pad(yzNow.getUTCMinutes());
         var yzAmpm = yzH >= 12 ? "PM" : "AM";
