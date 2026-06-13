@@ -176,6 +176,14 @@
         update();
         setInterval(update, 60000);
       }, msToNextMinute);
+
+      // 每30秒模拟一次鼠标移动，欺骗 Kindle 以为有用户操作，防止息屏
+      setInterval(function () {
+        var evt = document.createEvent("MouseEvents");
+        evt.initMouseEvent("mousemove", true, true, window,
+          0, 1, 1, 1, 1, false, false, false, false, 0, null);
+        document.dispatchEvent(evt);
+      }, 30000);
     </script>
   </body>
 </html>
