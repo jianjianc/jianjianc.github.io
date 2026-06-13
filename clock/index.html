@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>时钟</title>
+    <title>Clock</title>
     <style>
       * {
         margin: 0;
@@ -98,7 +98,9 @@
         "Saturday",
       ];
 
-      function pad(n) { return n < 10 ? "0" + n : "" + n; }
+      function pad(n) {
+        return n < 10 ? "0" + n : "" + n;
+      }
 
       // 计算达拉斯中部时区偏移（自动处理夏令时）
       // DST：3月第二个周日 2:00 AM CST (=8:00 UTC) 开始；11月第一个周日 2:00 AM CDT (=7:00 UTC) 结束
@@ -106,9 +108,10 @@
         var d = new Date(utcMs);
         var y = d.getUTCFullYear();
         var m = d.getUTCMonth(); // 0-based
-        if (m < 2 || m > 10) return -6;  // Jan/Feb/Dec: CST
-        if (m > 2 && m < 10) return -5;  // Apr–Oct: CDT
-        if (m === 2) { // March
+        if (m < 2 || m > 10) return -6; // Jan/Feb/Dec: CST
+        if (m > 2 && m < 10) return -5; // Apr–Oct: CDT
+        if (m === 2) {
+          // March
           var dow = new Date(Date.UTC(y, 2, 1)).getUTCDay();
           var sun2 = (dow === 0 ? 1 : 8 - dow) + 7;
           return utcMs >= Date.UTC(y, 2, sun2, 8) ? -5 : -6;
@@ -134,13 +137,18 @@
         var y = ctNow.getUTCFullYear();
         var mo = ctNow.getUTCMonth();
         var d = ctNow.getUTCDate();
-        document.getElementById("date").textContent = months[mo] + " " + d + ", " + y;
-        document.getElementById("weekday").textContent = weekdays[ctNow.getUTCDay()];
+        document.getElementById("date").textContent =
+          months[mo] + " " + d + ", " + y;
+        document.getElementById("weekday").textContent =
+          weekdays[ctNow.getUTCDay()];
 
         try {
           var lunar = Lunar.fromDate(new Date(y, mo, d));
           document.getElementById("lunar").textContent =
-            "农历 " + lunar.getMonthInChinese() + "月" + lunar.getDayInChinese();
+            "农历 " +
+            lunar.getMonthInChinese() +
+            "月" +
+            lunar.getDayInChinese();
         } catch (e) {
           document.getElementById("lunar").textContent = "";
         }
