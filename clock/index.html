@@ -97,11 +97,13 @@
         "Saturday",
       ];
 
+      function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
       function update() {
         var now = new Date();
 
         var h = now.getHours();
-        var m = String(now.getMinutes()).padStart(2, "0");
+        var m = pad(now.getMinutes());
         var ampm = h >= 12 ? "PM" : "AM";
         h = h % 12 || 12;
         document.getElementById("time").textContent = h + ":" + m + " " + ampm;
@@ -113,14 +115,18 @@
           months[mo] + " " + d + ", " + y;
         document.getElementById("weekday").textContent = weekdays[now.getDay()];
 
-        var lunar = Lunar.fromDate(now);
-        document.getElementById("lunar").textContent =
-          "农历 " + lunar.getMonthInChinese() + "月" + lunar.getDayInChinese();
+        try {
+          var lunar = Lunar.fromDate(now);
+          document.getElementById("lunar").textContent =
+            "农历 " + lunar.getMonthInChinese() + "月" + lunar.getDayInChinese();
+        } catch (e) {
+          document.getElementById("lunar").textContent = "";
+        }
 
         // 扬州时间 UTC+8：now.getTime() 是 UTC 毫秒，直接加 8 小时再用 getUTC* 读取
         var yzNow = new Date(now.getTime() + 8 * 60 * 60 * 1000);
         var yzH = yzNow.getUTCHours();
-        var yzM = String(yzNow.getUTCMinutes()).padStart(2, "0");
+        var yzM = pad(yzNow.getUTCMinutes());
         var yzAmpm = yzH >= 12 ? "PM" : "AM";
         yzH = yzH % 12 || 12;
         var yzMo = yzNow.getUTCMonth() + 1;
